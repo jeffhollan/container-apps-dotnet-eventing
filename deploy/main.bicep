@@ -171,6 +171,10 @@ resource ehContainerApp 'Microsoft.Web/containerApps@2021-03-01' = {
           name: storageConnectionSecretName
           value: eventHub.outputs.storageConnectionString
         }
+        {
+          name: pubsubConnectionSecretName
+          value: pubsub.outputs.pubsubConnectionString
+        }
       ]   
       registries: [
         {
@@ -205,6 +209,10 @@ resource ehContainerApp 'Microsoft.Web/containerApps@2021-03-01' = {
             {
               name: 'STORAGE_BLOB_NAME'
               value: storageLeaseBlobName
+            }
+            {
+              name: 'WEBPUBSUB_CONNECTION_STRING'
+              secretref: pubsubConnectionSecretName
             }
           ]
         }

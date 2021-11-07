@@ -5,16 +5,25 @@ using System.Threading.Tasks;
 using Azure.Messaging.EventHubs;
 using Azure.Messaging.EventHubs.Processor;
 using Azure.Storage.Blobs;
+using Azure.Messaging.WebPubSub;
 
 public class StreamProcessor : BackgroundService
 {
     private readonly ILogger<StreamProcessor> _logger;
     private readonly IConfiguration _configuration;
+    private readonly WebPubSubServiceClient _serviceClient;
+    private readonly bool _isPubSub = false;
 
     public StreamProcessor(IConfiguration configuration, ILogger<StreamProcessor> logger)
     {
         _configuration = configuration;
         _logger = logger;
+        var webPubSubConnectionString = _configuration.GetValue<string>("WEBPUBSUB_CONNECTION_STRING");
+        if(!string.IsNullOrEmpty(webPubSubConnectionString))
+        {
+            _serviceClient = new WebPubSubServiceClient(webPubSubConnectionString, "stream");
+            _isPubSub = true;
+        }
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -30,7 +39,12 @@ public class StreamProcessor : BackgroundService
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            _logger.LogInformation("StreamProcessor running at: {time}", DateTimeOffset.Now);
+            var message = $"StreamProcessor running at: {DateTimeOffset.Now}";
+            _logger.LogInformation(message);
+            if(_isPubSub)
+            {
+                _serviceClient.SendToAll(message);
+            }
             await Task.Delay(10000, stoppingToken);
         }
 
@@ -50,7 +64,12 @@ public class StreamProcessor : BackgroundService
 
     private async Task ProcessEventHandler(ProcessEventArgs eventArgs)
     {
-        _logger.LogInformation($"Received message {Encoding.UTF8.GetString(eventArgs.Data.EventBody.ToArray())}");
+        var message = $"Received message {Encoding.UTF8.GetString(eventArgs.Data.EventBody.ToArray())}";
+        _logger.LogInformation(message);
+        if(_isPubSub)
+        {
+            _serviceClient.SendToAll(message);
+        }
         await eventArgs.UpdateCheckpointAsync(eventArgs.CancellationToken);
     }
 }
