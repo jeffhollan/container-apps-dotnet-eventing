@@ -1,13 +1,15 @@
 param location string = resourceGroup().location
-param environmentName string = 'sample-env'
-param eventHubImage string
-param eventHubPort int
-param service-bus-Image string
-param service-bus-Port int
+param environmentName string = 'event-driven-sample-env'
+param serviceBusNamespace string = 'queue-${uniqueString(resourceGroup().id)}'
+param serviceBusQueueName string = 'queue'
+param serviceBusImage string
 param registry string
 param registryUsername string
 @secure()
 param registryPassword string
+
+var serviceBusConnectionSecretName = 'service-bus-connection-string'
+var registryPasswordPropertyName = 'registry-password'
 
 // Container Apps Environment (environment.bicep)
 module environment 'environment.bicep' = {
@@ -18,44 +20,81 @@ module environment 'environment.bicep' = {
   }
 }
 
-
-// Container-2-service-bus- (container-app.bicep)
-// We deploy it first so we can call it from the service-bus-app
-module service-bus-app 'container-app.bicep' = {
-  name: 'service-bus-app'
+module serviceBusQueue 'servicebus.bicep' = {
+  name: 'service-bus-queue'
   params: {
-    containerAppName: 'service-bus-app'
-    location: location
-    environmentId: environment.outputs.environmentId
-    containerImage: service-bus-Image
-    containerPort: service-bus-Port
-    containerRegistry: registry
-    containerRegistryUsername: registryUsername
-    containerRegistryPassword: registryPassword
-    isExternalIngress: false
+    serviceBusNamespaceName: serviceBusNamespace
+    serviceBusQueueName: serviceBusQueueName
   }
 }
 
-
-// Container-1-Node (container-app.bicep)
-module event-hub-app 'container-app.bicep' = {
-  name: 'event-hub-app'
-  params: {
-    containerAppName: 'event-hub-app'
-    location: location
-    environmentId: environment.outputs.environmentId
-    containerImage: eventHubImage
-    containerPort: eventHubPort
-    containerRegistry: registry
-    containerRegistryUsername: registryUsername
-    containerRegistryPassword: registryPassword
-    isExternalIngress: true
-    // set an environment var for the service-bus-FQDN to call
-    environmentVars: [
-      {
-        name: 'service-bus-_FQDN'
-        value: service-bus-app.outputs.fqdn
+// Service Bus Processor Container App
+resource containerApp 'Microsoft.Web/containerApps@2021-03-01' = {
+  name: 'service-bus-app'
+  kind: 'containerapp'
+  location: location
+  properties: {
+    kubeEnvironmentId: environment.outputs.environmentId
+    configuration: {
+      secrets: [
+        {
+          name: registryPasswordPropertyName
+          value: registryPassword
+        }
+        {
+          name: serviceBusConnectionSecretName
+          value: serviceBusQueue.outputs.serviceBusConnectionString
+        }
+      ]   
+      registries: [
+        {
+          server: registry
+          username: registryUsername
+          passwordSecretRef: registryPasswordPropertyName
+        }
+      ]
+    }
+    template: {
+      containers: [
+        {
+          image: serviceBusImage
+          name: 'service-bus-app'
+          env: [
+            {
+              name: 'SERVICEBUS_CONNECTION_STRING'
+              secretref: serviceBusConnectionSecretName
+            }
+            {
+              name: 'SERVICEBUS_QUEUE_NAME'
+              value: serviceBusQueueName
+            }
+          ]
+        }
+      ]
+      scale: {
+        minReplicas: 0
+        maxReplicas: 10
+        rules: [
+          {
+            name: 'sb-keda-scale'
+            custom: {
+              // https://keda.sh/docs/scalers/azure-service-bus/
+              type: 'azure-servicebus'
+              metadata: {
+                queueName: serviceBusQueueName
+                messageCount: '100'
+              }
+              auth: [
+                {
+                  secretRef: serviceBusConnectionSecretName
+                  // will replace the connectionFromRef KEDA property
+                  triggerParameter: 'connection'
+                }
+              ]
+            }
+          }
+        ]
       }
-    ]
+    }
   }
 }
