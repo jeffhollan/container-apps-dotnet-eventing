@@ -232,6 +232,7 @@ module staticapp 'staticapp.bicep' = if (deployDebugSite) {
     serviceBusConnection: serviceBusQueue.outputs.serviceBusConnectionString
     eventHubConnection: eventHub.outputs.eventHubConnectionString
     serviceBusQueueName: serviceBusQueueName
+    eventHubName: eventHubName
     repositoryUrl: repositoryUrl
     repositoryToken: repositoryToken
   }

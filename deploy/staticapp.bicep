@@ -7,14 +7,15 @@ param branch string = 'main'
 @secure()
 param serviceBusConnection string
 param serviceBusQueueName string = 'queue'
+param eventHubName string = 'events'
 @secure()
 param eventHubConnection string
 
 @secure()
 param repositoryToken string
-param appLocation string = '/static-app'
+param appLocation string = '/static-app/Client'
 param apiLocation string = '/static-app/Api'
-param appArtifactLocation string = 'bin'
+param appArtifactLocation string = 'wwwroot'
 
 resource staticwebapp 'Microsoft.Web/staticSites@2021-01-15' = {
   name: sitename
@@ -42,5 +43,6 @@ resource name_appsettings 'Microsoft.Web/staticSites/config@2021-01-15' = {
     ServiceBusConnection: serviceBusConnection
     SERVICEBUS_QUEUE_NAME: serviceBusQueueName
     EventHubConnection: eventHubConnection
+    EVENTHUB_NAME: eventHubName
   }
 }

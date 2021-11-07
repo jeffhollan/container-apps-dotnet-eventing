@@ -28,11 +28,13 @@ See how Azure Container Apps can be used to build containers that scale and run 
     private async Task SendSbMessage()
     {
         var result = await Http.PostAsJsonAsync<ServiceBusRequest>($"/api/ServiceBusSender", new ServiceBusRequest { Message = sbMessage });
+        sbMessage = "";
     }
 
     private async Task SendEhMessage()
     {
         var result = await Http.PostAsJsonAsync<EventHubRequest>($"/api/EventHubSender", new EventHubRequest { Message = ehMessage });
+        ehMessage = "";
     }
 }
 
