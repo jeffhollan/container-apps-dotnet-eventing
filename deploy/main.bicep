@@ -1,17 +1,30 @@
 param location string = resourceGroup().location
 param environmentName string = 'event-driven-sample-env'
+
+// Service Bus settings
 param serviceBusNamespace string = 'queue-${uniqueString(resourceGroup().id)}'
 param serviceBusQueueName string = 'queue'
+
+// Event Hub settings
 param eventHubNamespace string = 'eh-${uniqueString(resourceGroup().id)}'
 param eventHubName string = 'events'
 param eventHubConsumerGroup string = 'aca'
 param storageAccountName string = 'stor${uniqueString(resourceGroup().id)}'
+
+// Container Apps settings
 param serviceBusImage string
 param eventHubImage string
 param registry string
 param registryUsername string
 @secure()
 param registryPassword string
+
+// Settings for Static Web App if deploying (by default will not)
+param deployDebugSite bool = false
+param staticWebAppName string = 'debug-site'
+param repositoryUrl string = ''
+@secure()
+param repositoryToken string = ''
 
 var serviceBusConnectionSecretName = 'service-bus-connection-string'
 var eventHubConnectionSecretName = 'event-hub-connection-string'
@@ -208,5 +221,18 @@ resource ehContainerApp 'Microsoft.Web/containerApps@2021-03-01' = {
         ]
       }
     }
+  }
+}
+
+module staticapp 'staticapp.bicep' = if (deployDebugSite) {
+  name: 'static-web-app'
+  params: {
+    sitename: staticWebAppName
+    location: location
+    serviceBusConnection: serviceBusQueue.outputs.serviceBusConnectionString
+    eventHubConnection: eventHub.outputs.eventHubConnectionString
+    serviceBusQueueName: serviceBusQueueName
+    repositoryUrl: repositoryUrl
+    repositoryToken: repositoryToken
   }
 }
