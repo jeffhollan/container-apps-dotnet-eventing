@@ -15,7 +15,7 @@ namespace BlazorApp.Api
         [FunctionName("ServiceBusSender")]
         public static IActionResult Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] ServiceBusRequest req,
-            [ServiceBus("%SERVICEBUS_QUEUE_NAME%", ServiceBusEntityType.Queue, Connection = "ServiceBusConnection")] out string message,
+            [ServiceBus("%SERVICEBUS_QUEUE_NAME%", Connection = "ServiceBusConnection")] out string message,
             ILogger log)
         {
             message = req.Message;
