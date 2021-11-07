@@ -25,6 +25,9 @@ public class StreamProcessor : BackgroundService
         processor.ProcessEventAsync += ProcessEventHandler;
         processor.ProcessErrorAsync += ProcessErrorHandler;
 
+        // Start the processing
+        await processor.StartProcessingAsync();
+
         while (!stoppingToken.IsCancellationRequested)
         {
             _logger.LogInformation("StreamProcessor running at: {time}", DateTimeOffset.Now);
@@ -34,6 +37,8 @@ public class StreamProcessor : BackgroundService
         _logger.LogInformation("Closing message pump");
         processor.ProcessEventAsync -= ProcessEventHandler;
         processor.ProcessErrorAsync -= ProcessErrorHandler;
+        // Stop the processing
+        await processor.StopProcessingAsync();
 
         _logger.LogInformation("Message pump closed : {Time}", DateTimeOffset.UtcNow);
     }
@@ -43,9 +48,9 @@ public class StreamProcessor : BackgroundService
         throw new NotImplementedException();
     }
 
-    private Task ProcessEventHandler(ProcessEventArgs eventArgs)
+    private async Task ProcessEventHandler(ProcessEventArgs eventArgs)
     {
         _logger.LogInformation($"Recieved message {Encoding.UTF8.GetString(eventArgs.Data.EventBody.ToArray())}");
-        return Task.CompletedTask;
+        await eventArgs.UpdateCheckpointAsync(eventArgs.CancellationToken);
     }
 }
