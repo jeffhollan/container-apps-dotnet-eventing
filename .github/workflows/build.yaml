@@ -5,6 +5,10 @@ on:
     branches: [ main ]
     # Publish semver tags as releases.
     tags: [ 'v*.*.*' ]
+    paths:
+      - event-hub/**
+      - service-bus/**
+      - .github/workflows/build.yaml
   workflow_dispatch:
 
 env:
