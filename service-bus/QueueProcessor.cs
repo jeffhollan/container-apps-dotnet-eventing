@@ -1,5 +1,7 @@
 namespace service_bus;
 
+using System;
+using System.Collections;
 using System.Text;
 using System.Threading.Tasks;
 using Azure.Messaging.ServiceBus;
@@ -28,6 +30,10 @@ public class QueueProcessor : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        foreach(DictionaryEntry var in Environment.GetEnvironmentVariables())
+        {
+            _logger.LogInformation($"{var.Key} = {var.Value}");
+        }
         var queueName = _configuration.GetValue<string>("SERVICEBUS_QUEUE_NAME");
         var serviceBusClient = new ServiceBusClient(_configuration.GetValue<string>("SERVICEBUS_CONNECTION_STRING"));
         var messageProcessor = serviceBusClient.CreateProcessor(queueName);
