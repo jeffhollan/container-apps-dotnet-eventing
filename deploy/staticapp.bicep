@@ -17,6 +17,10 @@ param appLocation string = '/static-app/Client'
 param apiLocation string = '/static-app/Api'
 param appArtifactLocation string = 'wwwroot'
 
+@secure()
+param pubsubConnectionString string = ''
+
+
 resource staticwebapp 'Microsoft.Web/staticSites@2021-01-15' = {
   name: sitename
   location: location
@@ -36,6 +40,7 @@ resource staticwebapp 'Microsoft.Web/staticSites@2021-01-15' = {
   }
 }
 
+
 resource name_appsettings 'Microsoft.Web/staticSites/config@2021-01-15' = {
   parent: staticwebapp
   name: 'appsettings'
@@ -44,5 +49,6 @@ resource name_appsettings 'Microsoft.Web/staticSites/config@2021-01-15' = {
     SERVICEBUS_QUEUE_NAME: serviceBusQueueName
     EventHubConnection: eventHubConnection
     EVENTHUB_NAME: eventHubName
+    WebPubSubConnectionString: pubsubConnectionString
   }
 }

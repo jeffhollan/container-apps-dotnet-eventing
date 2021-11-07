@@ -49,6 +49,14 @@ module serviceBusQueue 'servicebus.bicep' = {
   }
 }
 
+// Deploy Azure Web PubSub if deploying the debug site
+module pubsub 'webpubsub.bicep' = if (deployDebugSite) {
+  name: 'web-pubsub'
+  params: {
+    location: location
+  }
+}
+
 // Service Bus Processor Container App
 resource sbContainerApp 'Microsoft.Web/containerApps@2021-03-01' = {
   name: 'service-bus-app'
@@ -226,6 +234,7 @@ resource ehContainerApp 'Microsoft.Web/containerApps@2021-03-01' = {
   }
 }
 
+
 module staticapp 'staticapp.bicep' = if (deployDebugSite) {
   name: 'static-web-app'
   params: {
@@ -237,5 +246,6 @@ module staticapp 'staticapp.bicep' = if (deployDebugSite) {
     eventHubName: eventHubName
     repositoryUrl: repositoryUrl
     repositoryToken: repositoryToken
+    pubsubConnectionString: pubsub.outputs.pubsubConnectionString
   }
 }
