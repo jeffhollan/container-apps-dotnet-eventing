@@ -69,5 +69,5 @@ resource container 'Microsoft.Storage/storageAccounts/blobServices/containers@20
   name: '${storageAccount.name}/default/${storageLeaseBlobName}'
 }
 
-output eventHubConnectionString string = listKeys(endpoint, eventHub.apiVersion).primaryConnectionString
+output eventHubConnectionString string = '${listKeys(endpoint, eventHub.apiVersion).primaryConnectionString};EntityPath=${eventHubName}'
 output storageConnectionString string = 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccount.listKeys().keys[0].value}'
