@@ -19,6 +19,22 @@
         <a class="dismiss">🗙</a>
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
+    <script>
+        (async function () {
+            let res = await fetch(`${window.location.origin}/api/negotiate`);
+            let url = await res.json();
+            let ws = new WebSocket(url.url);
+            ws.onopen = () => console.log('connected');
+    
+            ws.onmessage = event => {
+                let messages = document.getElementById('messages');
+                let m = document.createElement('code');
+                m.innerText = event.data;
+                messages.appendChild(m);
+                messages.appendChild(document.createElement('br'));
+            };
+        })();
+    </script>
 </body>
 
 </html>

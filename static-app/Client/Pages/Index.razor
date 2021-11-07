@@ -22,6 +22,12 @@ See how Azure Container Apps can be used to build containers that scale and run 
 
 <button class="btn btn-primary" @onclick="SendEhMessage">Send Message</button>
 
+<br/>
+<hr/>
+<h3>Message stream from containers</h3>
+<div id="messages" style="heigth:400px;overflow-y:auto;">
+</div>
+
 @code {
     private string sbMessage;
     private string ehMessage;
