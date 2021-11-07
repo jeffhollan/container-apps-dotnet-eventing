@@ -2,14 +2,22 @@ param location string = resourceGroup().location
 param environmentName string = 'event-driven-sample-env'
 param serviceBusNamespace string = 'queue-${uniqueString(resourceGroup().id)}'
 param serviceBusQueueName string = 'queue'
+param eventHubNamespace string = 'eh-${uniqueString(resourceGroup().id)}'
+param eventHubName string = 'events'
+param eventHubConsumerGroup string = 'aca'
+param storageAccountName string = 'stor${uniqueString(resourceGroup().id)}'
 param serviceBusImage string
+param eventHubImage string
 param registry string
 param registryUsername string
 @secure()
 param registryPassword string
 
 var serviceBusConnectionSecretName = 'service-bus-connection-string'
+var eventHubConnectionSecretName = 'event-hub-connection-string'
+var storageConnectionSecretName = 'storage-connection-string'
 var registryPasswordPropertyName = 'registry-password'
+var storageLeaseBlobName = 'aca-leases'
 
 // Container Apps Environment (environment.bicep)
 module environment 'environment.bicep' = {
@@ -29,7 +37,7 @@ module serviceBusQueue 'servicebus.bicep' = {
 }
 
 // Service Bus Processor Container App
-resource containerApp 'Microsoft.Web/containerApps@2021-03-01' = {
+resource sbContainerApp 'Microsoft.Web/containerApps@2021-03-01' = {
   name: 'service-bus-app'
   kind: 'containerapp'
   location: location
@@ -90,6 +98,109 @@ resource containerApp 'Microsoft.Web/containerApps@2021-03-01' = {
                   secretRef: serviceBusConnectionSecretName
                   // will replace the connectionFromRef KEDA property
                   triggerParameter: 'connection'
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}
+
+module eventHub 'eventhub.bicep' = {
+  name: 'eventhub'
+  params: {
+    eventHubNamespaceName: eventHubNamespace
+    eventHubName: eventHubName
+    consumerGroupName: eventHubConsumerGroup
+    storageAccountName: storageAccountName
+  }
+}
+
+resource ehContainerApp 'Microsoft.Web/containerApps@2021-03-01' = {
+  name: 'event-hub-app'
+  kind: 'containerapp'
+  location: location
+  properties: {
+    kubeEnvironmentId: environment.outputs.environmentId
+    configuration: {
+      activeRevisionsMode: 'single'
+      secrets: [
+        {
+          name: registryPasswordPropertyName
+          value: registryPassword
+        }
+        {
+          name: eventHubConnectionSecretName
+          value: eventHub.outputs.eventHubConnectionString
+        }
+        {
+          name: storageConnectionSecretName
+          value: eventHub.outputs.storageConnectionString
+        }
+      ]   
+      registries: [
+        {
+          server: registry
+          username: registryUsername
+          passwordSecretRef: registryPasswordPropertyName
+        }
+      ]
+    }
+    template: {
+      containers: [
+        {
+          image: eventHubImage
+          name: 'event-hub-app'
+          env: [
+            {
+              name: 'EVENTHUB_CONNECTION_STRING'
+              secretref: eventHubConnectionSecretName
+            }
+            {
+              name: 'EVENTHUB_NAME'
+              value: eventHubName
+            }
+            {
+              name: 'EVENTHUB_CONSUMER_GROUP'
+              value: eventHubConsumerGroup
+            }
+            {
+              name: 'STORAGE_CONNECTION_STRING'
+              secretref: storageConnectionSecretName
+            }
+            {
+              name: 'STORAGE_BLOB_NAME'
+              value: storageLeaseBlobName
+            }
+          ]
+        }
+      ]
+      scale: {
+        minReplicas: 0
+        maxReplicas: 10
+        rules: [
+          {
+            name: 'sb-keda-scale'
+            custom: {
+              // https://keda.sh/docs/scalers/azure-event-hub/
+              type: 'azure-eventhub'
+              metadata: {
+                consumerGroup: eventHubConsumerGroup
+                unprocessedEventThreshold: '64'
+                blobContainer: storageLeaseBlobName
+              }
+              auth: [
+                {
+                  secretRef: eventHubConnectionSecretName
+                  // will replace the connectionFromRef KEDA property
+                  triggerParameter: 'connection'
+                }
+                {
+                  secretRef: storageConnectionSecretName
+                  // will replace the storageConnectionFromEnv KEDA property
+                  triggerParameter: 'storageConnection'
                 }
               ]
             }
