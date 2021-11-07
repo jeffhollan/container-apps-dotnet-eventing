@@ -36,6 +36,7 @@ resource containerApp 'Microsoft.Web/containerApps@2021-03-01' = {
   properties: {
     kubeEnvironmentId: environment.outputs.environmentId
     configuration: {
+      activeRevisionsMode: 'single'
       secrets: [
         {
           name: registryPasswordPropertyName
