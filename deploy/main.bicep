@@ -128,6 +128,7 @@ module eventHub 'eventhub.bicep' = {
     eventHubName: eventHubName
     consumerGroupName: eventHubConsumerGroup
     storageAccountName: storageAccountName
+    storageLeaseBlobName: storageLeaseBlobName
   }
 }
 
@@ -203,6 +204,7 @@ resource ehContainerApp 'Microsoft.Web/containerApps@2021-03-01' = {
                 consumerGroup: eventHubConsumerGroup
                 unprocessedEventThreshold: '64'
                 blobContainer: storageLeaseBlobName
+                checkpointStrategy: 'blobMetadata'
               }
               auth: [
                 {
