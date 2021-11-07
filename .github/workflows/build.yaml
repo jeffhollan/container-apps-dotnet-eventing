@@ -96,5 +96,5 @@ jobs:
                 registryUsername=${{ github.actor }} \
                 registryPassword=${{ secrets.PACKAGES_TOKEN }} \
                 deployDebugSite=${{ secrets.DEBUG_SITE }} \
-                repositoryUrl='${{ github.server_url }}/{{ github.repository }}.git' \
+                repositoryUrl='${{ github.server_url }}/${{ github.repository }}.git' \
                 repositoryToken='${{ secrets.GITHUB_TOKEN }}'
