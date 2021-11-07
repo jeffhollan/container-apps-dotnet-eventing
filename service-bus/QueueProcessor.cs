@@ -11,6 +11,7 @@ public class QueueProcessor : BackgroundService
     private readonly IConfiguration _configuration;
     private readonly WebPubSubServiceClient _serviceClient;
     private readonly bool _isPubSub = false;
+    private readonly string _podName;
 
     public QueueProcessor(IConfiguration configuration, ILogger<QueueProcessor> logger)
     {
@@ -22,6 +23,7 @@ public class QueueProcessor : BackgroundService
             _serviceClient = new WebPubSubServiceClient(webPubSubConnectionString, "stream");
             _isPubSub = true;
         }
+        _podName = _configuration.GetValue<string>("POD_NAME");
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -38,7 +40,7 @@ public class QueueProcessor : BackgroundService
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            var message = $"QueueProcessor running at: {DateTimeOffset.Now}";
+            var message = $"{_podName}: QueueProcessor running at: {DateTimeOffset.Now}";
             _logger.LogInformation(message);
             if(_isPubSub)
             {
@@ -59,7 +61,7 @@ public class QueueProcessor : BackgroundService
 
     private Task HandleMessageAsync(ProcessMessageEventArgs msg)
     {
-        var message = $"Recieved Service Bus message {Encoding.UTF8.GetString(msg.Message.Body.ToArray())}";
+        var message = $"{_podName}: Received Service Bus message {Encoding.UTF8.GetString(msg.Message.Body.ToArray())}";
         _logger.LogInformation(message);
         if(_isPubSub)
         {

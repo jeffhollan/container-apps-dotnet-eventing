@@ -13,6 +13,7 @@ public class StreamProcessor : BackgroundService
     private readonly IConfiguration _configuration;
     private readonly WebPubSubServiceClient _serviceClient;
     private readonly bool _isPubSub = false;
+    private readonly string _podName;
 
     public StreamProcessor(IConfiguration configuration, ILogger<StreamProcessor> logger)
     {
@@ -24,6 +25,7 @@ public class StreamProcessor : BackgroundService
             _serviceClient = new WebPubSubServiceClient(webPubSubConnectionString, "stream");
             _isPubSub = true;
         }
+        _podName = _configuration.GetValue<string>("POD_NAME");
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -39,7 +41,7 @@ public class StreamProcessor : BackgroundService
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            var message = $"StreamProcessor running at: {DateTimeOffset.Now}";
+            var message = $"{_podName}: StreamProcessor running at: {DateTimeOffset.Now}.";
             _logger.LogInformation(message);
             if(_isPubSub)
             {
@@ -64,7 +66,7 @@ public class StreamProcessor : BackgroundService
 
     private async Task ProcessEventHandler(ProcessEventArgs eventArgs)
     {
-        var message = $"Received Event Hub message {Encoding.UTF8.GetString(eventArgs.Data.EventBody.ToArray())}";
+        var message = $"{_podName}: Received Event Hub message {Encoding.UTF8.GetString(eventArgs.Data.EventBody.ToArray())}";
         _logger.LogInformation(message);
         if(_isPubSub)
         {
