@@ -8,6 +8,7 @@ on:
     paths:
       - event-hub/**
       - service-bus/**
+      - deploy/**
       - .github/workflows/build.yaml
   workflow_dispatch:
 
