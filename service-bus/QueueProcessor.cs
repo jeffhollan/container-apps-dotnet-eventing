@@ -59,7 +59,7 @@ public class QueueProcessor : BackgroundService
 
     private Task HandleMessageAsync(ProcessMessageEventArgs msg)
     {
-        var message = $"Recieved message {Encoding.UTF8.GetString(msg.Message.Body.ToArray())}";
+        var message = $"Recieved Service Bus message {Encoding.UTF8.GetString(msg.Message.Body.ToArray())}";
         _logger.LogInformation(message);
         if(_isPubSub)
         {

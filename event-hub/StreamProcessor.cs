@@ -64,7 +64,7 @@ public class StreamProcessor : BackgroundService
 
     private async Task ProcessEventHandler(ProcessEventArgs eventArgs)
     {
-        var message = $"Received message {Encoding.UTF8.GetString(eventArgs.Data.EventBody.ToArray())}";
+        var message = $"Received Event Hub message {Encoding.UTF8.GetString(eventArgs.Data.EventBody.ToArray())}";
         _logger.LogInformation(message);
         if(_isPubSub)
         {
