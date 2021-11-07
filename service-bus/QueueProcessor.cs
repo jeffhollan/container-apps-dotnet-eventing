@@ -3,16 +3,25 @@ namespace service_bus;
 using System.Text;
 using System.Threading.Tasks;
 using Azure.Messaging.ServiceBus;
+using Azure.Messaging.WebPubSub;
 
 public class QueueProcessor : BackgroundService
 {
     private readonly ILogger<QueueProcessor> _logger;
     private readonly IConfiguration _configuration;
+    private readonly WebPubSubServiceClient _serviceClient;
+    private readonly bool _isPubSub = false;
 
     public QueueProcessor(IConfiguration configuration, ILogger<QueueProcessor> logger)
     {
         _configuration = configuration;
         _logger = logger;
+        var webPubSubConnectionString = _configuration.GetValue<string>("WEBPUBSUB_CONNECTION_STRING");
+        if(!string.IsNullOrEmpty(webPubSubConnectionString))
+        {
+            _serviceClient = new WebPubSubServiceClient(webPubSubConnectionString, "stream");
+            _isPubSub = true;
+        }
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -29,7 +38,12 @@ public class QueueProcessor : BackgroundService
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            _logger.LogInformation("QueueProcessor running at: {time}", DateTimeOffset.Now);
+            var message = $"QueueProcessor running at: {DateTimeOffset.Now}";
+            _logger.LogInformation(message);
+            if(_isPubSub)
+            {
+                _serviceClient.SendToAll(message);
+            }
             await Task.Delay(10000, stoppingToken);
         }
 
@@ -45,7 +59,12 @@ public class QueueProcessor : BackgroundService
 
     private Task HandleMessageAsync(ProcessMessageEventArgs msg)
     {
-        _logger.LogInformation($"Recieved message {Encoding.UTF8.GetString(msg.Message.Body.ToArray())}");
+        var message = $"Recieved message {Encoding.UTF8.GetString(msg.Message.Body.ToArray())}";
+        _logger.LogInformation(message);
+        if(_isPubSub)
+        {
+            _serviceClient.SendToAll(message);
+        }
         return Task.CompletedTask;
     }
 }
