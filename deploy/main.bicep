@@ -1,5 +1,6 @@
 param location string = resourceGroup().location
 param environmentName string = 'event-driven-sample-env'
+param swaLocation string = 'centralus'
 
 // Service Bus settings
 param serviceBusNamespace string = 'queue-${uniqueString(resourceGroup().id)}'
@@ -239,7 +240,7 @@ module staticapp 'staticapp.bicep' = if (deployDebugSite) {
   name: 'static-web-app'
   params: {
     sitename: staticWebAppName
-    location: location
+    location: swaLocation
     serviceBusConnection: serviceBusQueue.outputs.serviceBusConnectionString
     eventHubConnection: eventHub.outputs.eventHubConnectionString
     serviceBusQueueName: serviceBusQueueName
