@@ -25,7 +25,7 @@ public class StreamProcessor : BackgroundService
             _serviceClient = new WebPubSubServiceClient(webPubSubConnectionString, "stream");
             _isPubSub = true;
         }
-        _podName = _configuration.GetValue<string>("POD_NAME");
+        _podName = _configuration.GetValue<string>("CONTAINER_APP_REVISION");
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

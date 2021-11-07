@@ -25,15 +25,11 @@ public class QueueProcessor : BackgroundService
             _serviceClient = new WebPubSubServiceClient(webPubSubConnectionString, "stream");
             _isPubSub = true;
         }
-        _podName = _configuration.GetValue<string>("POD_NAME");
+        _podName = _configuration.GetValue<string>("CONTAINER_APP_REVISION");
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        foreach(DictionaryEntry var in Environment.GetEnvironmentVariables())
-        {
-            _logger.LogInformation($"{var.Key} = {var.Value}");
-        }
         var queueName = _configuration.GetValue<string>("SERVICEBUS_QUEUE_NAME");
         var serviceBusClient = new ServiceBusClient(_configuration.GetValue<string>("SERVICEBUS_CONNECTION_STRING"));
         var messageProcessor = serviceBusClient.CreateProcessor(queueName);
