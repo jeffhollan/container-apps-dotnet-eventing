@@ -50,7 +50,7 @@ public class StreamProcessor : BackgroundService
 
     private async Task ProcessEventHandler(ProcessEventArgs eventArgs)
     {
-        _logger.LogInformation($"Recieved message {Encoding.UTF8.GetString(eventArgs.Data.EventBody.ToArray())}");
+        _logger.LogInformation($"Received message {Encoding.UTF8.GetString(eventArgs.Data.EventBody.ToArray())}");
         await eventArgs.UpdateCheckpointAsync(eventArgs.CancellationToken);
     }
 }

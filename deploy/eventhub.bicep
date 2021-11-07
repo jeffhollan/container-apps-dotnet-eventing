@@ -5,6 +5,7 @@ param eventHubNamespaceName string
 param eventHubName string
 param consumerGroupName string
 param storageAccountName string
+param storageLeaseBlobName string = 'aca-leases'
 
 var endpoint = '${eventHubNamespace.id}/AuthorizationRules/RootManageSharedAccessKey'
 
@@ -62,6 +63,10 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2019-06-01' = {
     }
     accessTier: 'Hot'
   }
+}
+
+resource container 'Microsoft.Storage/storageAccounts/blobServices/containers@2019-06-01' = {
+  name: '${storageAccount.name}/default/${storageLeaseBlobName}'
 }
 
 output eventHubConnectionString string = listKeys(endpoint, eventHub.apiVersion).primaryConnectionString
