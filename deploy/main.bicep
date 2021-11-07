@@ -32,6 +32,7 @@ var eventHubConnectionSecretName = 'event-hub-connection-string'
 var storageConnectionSecretName = 'storage-connection-string'
 var registryPasswordPropertyName = 'registry-password'
 var storageLeaseBlobName = 'aca-leases'
+var pubsubConnectionSecretName = 'webpubsub-connection-string'
 
 // Container Apps Environment (environment.bicep)
 module environment 'environment.bicep' = {
@@ -51,7 +52,7 @@ module serviceBusQueue 'servicebus.bicep' = {
 }
 
 // Deploy Azure Web PubSub if deploying the debug site
-module pubsub 'webpubsub.bicep' = if (deployDebugSite) {
+module pubsub 'webpubsub.bicep' = {
   name: 'web-pubsub'
   params: {
     location: location
@@ -76,6 +77,10 @@ resource sbContainerApp 'Microsoft.Web/containerApps@2021-03-01' = {
           name: serviceBusConnectionSecretName
           value: serviceBusQueue.outputs.serviceBusConnectionString
         }
+        {
+          name: pubsubConnectionSecretName
+          value: pubsub.outputs.pubsubConnectionString
+        }
       ]   
       registries: [
         {
@@ -98,6 +103,10 @@ resource sbContainerApp 'Microsoft.Web/containerApps@2021-03-01' = {
             {
               name: 'SERVICEBUS_QUEUE_NAME'
               value: serviceBusQueueName
+            }
+            {
+              name: 'WEBPUBSUB_CONNECTION_STRING'
+              secretref: pubsubConnectionSecretName
             }
           ]
         }

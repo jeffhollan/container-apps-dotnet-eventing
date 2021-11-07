@@ -19,7 +19,7 @@ The GitHub Actions will deploy an environment that includes both the with-fqdn a
   | AZURE_CREDENTIALS | The JSON credentials for an Azure subscription. [Learn more](https://docs.microsoft.com/azure/developer/github/connect-from-azure?tabs=azure-portal%2Cwindows#create-a-service-principal-and-add-it-as-a-github-secret) |
   | RESOURCE_GROUP | The name of the resource group to create |
   | PACKAGES_TOKEN | A GitHub personal access token with the `packages:read` scope. [Learn more](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) |
-  | DEBUG_SITE | `true` or `false`  on if to also deploy the Static Web App and Web PubSub used to view and debug the solution.|
+  | DEBUG_SITE | `true` or `false`  on if to also deploy the Static Web App and Web PubSub used to view and debug the solution. After initial deploy, set to `false`.|
   | SWA_TOKEN | (optional if using the debug and view logs) A GitHub personal access token with the `repo` scope. This is used by Azure Static Web Apps to generate the secrets and actions for the static web app publish. [Learn more](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) |
 
 Once the solution has deployed, open the resource group and navigate to the create `debug-site` Azure Static Web App and browse to the URL.  You will be presented with a site that will let you send messages securely to the Event Hub and Service Bus queue, and view logs from the containers in real time via Azure Web PubSub.
