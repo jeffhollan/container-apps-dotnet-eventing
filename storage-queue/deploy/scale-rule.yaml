@@ -1,0 +1,7 @@
+- name: queue-scaling-rule
+  azureQueue:
+    auth:
+    - secretRef: storage-connection
+      triggerParameter: connection
+    queueLength: 5
+    queueName: queue
