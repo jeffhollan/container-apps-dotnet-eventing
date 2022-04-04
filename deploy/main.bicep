@@ -60,12 +60,11 @@ module pubsub 'webpubsub.bicep' = {
 }
 
 // Service Bus Processor Container App
-resource sbContainerApp 'Microsoft.Web/containerApps@2021-03-01' = {
+resource sbContainerApp 'Microsoft.App/containerApps@2022-01-01-preview' = {
   name: 'service-bus-app'
-  kind: 'containerapp'
   location: location
   properties: {
-    kubeEnvironmentId: environment.outputs.environmentId
+    managedEnvironmentId: environment.outputs.environmentId
     configuration: {
       activeRevisionsMode: 'single'
       secrets: [
@@ -81,7 +80,7 @@ resource sbContainerApp 'Microsoft.Web/containerApps@2021-03-01' = {
           name: pubsubConnectionSecretName
           value: pubsub.outputs.pubsubConnectionString
         }
-      ]   
+      ]
       registries: [
         {
           server: registry
@@ -98,7 +97,7 @@ resource sbContainerApp 'Microsoft.Web/containerApps@2021-03-01' = {
           env: [
             {
               name: 'SERVICEBUS_CONNECTION_STRING'
-              secretref: serviceBusConnectionSecretName
+              secretRef: serviceBusConnectionSecretName
             }
             {
               name: 'SERVICEBUS_QUEUE_NAME'
@@ -106,7 +105,7 @@ resource sbContainerApp 'Microsoft.Web/containerApps@2021-03-01' = {
             }
             {
               name: 'WEBPUBSUB_CONNECTION_STRING'
-              secretref: pubsubConnectionSecretName
+              secretRef: pubsubConnectionSecretName
             }
           ]
         }
@@ -150,12 +149,11 @@ module eventHub 'eventhub.bicep' = {
   }
 }
 
-resource ehContainerApp 'Microsoft.Web/containerApps@2021-03-01' = {
+resource ehContainerApp 'Microsoft.App/containerApps@2022-01-01-preview' = {
   name: 'event-hub-app'
-  kind: 'containerapp'
   location: location
   properties: {
-    kubeEnvironmentId: environment.outputs.environmentId
+    managedEnvironmentId: environment.outputs.environmentId
     configuration: {
       activeRevisionsMode: 'single'
       secrets: [
@@ -175,7 +173,7 @@ resource ehContainerApp 'Microsoft.Web/containerApps@2021-03-01' = {
           name: pubsubConnectionSecretName
           value: pubsub.outputs.pubsubConnectionString
         }
-      ]   
+      ]
       registries: [
         {
           server: registry
@@ -192,7 +190,7 @@ resource ehContainerApp 'Microsoft.Web/containerApps@2021-03-01' = {
           env: [
             {
               name: 'EVENTHUB_CONNECTION_STRING'
-              secretref: eventHubConnectionSecretName
+              secretRef: eventHubConnectionSecretName
             }
             {
               name: 'EVENTHUB_NAME'
@@ -204,7 +202,7 @@ resource ehContainerApp 'Microsoft.Web/containerApps@2021-03-01' = {
             }
             {
               name: 'STORAGE_CONNECTION_STRING'
-              secretref: storageConnectionSecretName
+              secretRef: storageConnectionSecretName
             }
             {
               name: 'STORAGE_BLOB_NAME'
@@ -212,7 +210,7 @@ resource ehContainerApp 'Microsoft.Web/containerApps@2021-03-01' = {
             }
             {
               name: 'WEBPUBSUB_CONNECTION_STRING'
-              secretref: pubsubConnectionSecretName
+              secretRef: pubsubConnectionSecretName
             }
           ]
         }
@@ -251,7 +249,6 @@ resource ehContainerApp 'Microsoft.Web/containerApps@2021-03-01' = {
     }
   }
 }
-
 
 module staticapp 'staticapp.bicep' = if (deployDebugSite) {
   name: 'static-web-app'
