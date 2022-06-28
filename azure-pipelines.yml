@@ -11,9 +11,11 @@ resources:
 variables:
   # Container registry service connection established during pipeline creation
   dockerRegistryServiceConnection: '4195a6a6-7ca9-49be-a527-2973a9310d00'
-  imageRepository: 'containerappsdotneteventing'
+  imageRepositorybus: 'container-apps-dotnet-eventing/servicebus'
+  imageRepositoryhub: 'container-apps-dotnet-eventing/eventhub'
   containerRegistry: 'repasowebappacr.azurecr.io'
-  dockerfilePath: '$(Build.SourcesDirectory)/event-hub/Dockerfile'
+  dockerfilePathHub: '$(Build.SourcesDirectory)/event-hub/Dockerfile'
+  dockerfilePathBus: '$(Build.SourcesDirectory)/service-bus/Dockerfile'
   tag: '$(Build.BuildId)'
 
   # Agent VM image name
@@ -29,11 +31,20 @@ stages:
       vmImage: $(vmImageName)
     steps:
     - task: Docker@2
-      displayName: Build and push an image to container registry
+      displayName: (Hub) Build and push an image to container registry
       inputs:
         command: buildAndPush
-        repository: $(imageRepository)
-        dockerfile: $(dockerfilePath)
+        repository: $(imageRepositoryhub)
+        dockerfile: $(dockerfilePathBus)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+    - task: Docker@2
+      displayName: (Bus) Build and push an image to container registry
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepositorybus)
+        dockerfile: $(dockerfilePathBus)
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
