@@ -67,6 +67,8 @@ stages:
           steps:   
           - script: echo "Tratando de Crear ACA"
             displayName: 'Msg Deploy'   
+          - script: ls
+            displayName: 'Listandoo...'               
           - task: AzureCLI@2
             inputs:
                 azureSubscription: scazuresponsorship
