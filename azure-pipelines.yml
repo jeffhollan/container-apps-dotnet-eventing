@@ -69,7 +69,7 @@ stages:
             displayName: 'Msg Deploy'   
           - task: AzureCLI@2
             inputs:
-                azureSubscription: $(Subscription)
+                azureSubscription: scazuresponsorship
                 scriptType: bash
                 scriptLocation: inlineScript
                 inlineScript: |
