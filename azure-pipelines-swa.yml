@@ -21,6 +21,8 @@ stages:
       runOnce:
         deploy:
           steps:
+          - script: ls -lh
+            displayName: 'Listandoo en Build' 
           - task: AzureStaticWebApp@0
             inputs:
              app_location: '/static-app/Client' # App source code path
