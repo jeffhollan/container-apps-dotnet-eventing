@@ -24,6 +24,7 @@ stages:
       runOnce:
         deploy:
           steps:
+          - checkout: self
           - script: ls -lh
             displayName: 'Listandoo en Build' 
           - task: AzureStaticWebApp@0
