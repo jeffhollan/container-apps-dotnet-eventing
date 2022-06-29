@@ -16,6 +16,7 @@ variables:
   containerRegistry: 'repasowebappacr.azurecr.io'
   dockerfilePathHub: '$(Build.SourcesDirectory)/event-hub/Dockerfile'
   dockerfilePathBus: '$(Build.SourcesDirectory)/service-bus/Dockerfile'
+  DEBUG_SITE: true
   tag: '$(Build.BuildId)'
 
   # Agent VM image name
@@ -83,5 +84,14 @@ stages:
                   az --version
                   az group create --name $(RESOURCE_GROUP) --location 'canadacentral'
                   # $(location)
-                  az deployment group create --resource-group $(RESOURCE_GROUP) --template-file deploy/main.bicep
+                  az deployment group create --resource-group $(RESOURCE_GROUP) --template-file deploy/main.bicep \
+                  -p \
+                serviceBusImage='$(imageRepositorybus)' \
+                eventHubImage='$(imageRepositoryhub)' \
+                registry=$(containerRegistry) \
+                registryUsername=fisica3 \
+                registryPassword=prueba \
+                deployDebugSite='$(DEBUG_SITE) 
+                #repositoryUrl='${{ github.server_url }}/${{ github.repository }}.git' \
+                #repositoryToken='${{ secrets.SWA_TOKEN }}'
                   # $(templateFile)    
