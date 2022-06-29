@@ -5,14 +5,14 @@ pool:
   vmImage: ubuntu-latest
 stages:
 - stage: SwaDEV
-  displayName: SWA DEV
+  displayName: Static Web Apps DEV
 
   jobs:
   - deployment: dev_deploy
     #pool:
     #  vmImage: $(vmImageName) 
     displayName: Deploy en Dev
-    environment: 'DEV'
+    environment: 'DEV_SWA'
     variables:
       - name: environment
         value: DEV
@@ -23,9 +23,9 @@ stages:
           steps:
           - task: AzureStaticWebApp@0
             inputs:
-             app_location: '/'
-             api_location: 'api'
-      #  routes_location: '/public'
+             app_location: '/static-app/Client' # App source code path
+             api_location: '/static-app/Api' # Api source code path - optional
+             output_location: 'wwwroot' # Built app content directory - optional
              azure_static_web_apps_api_token: $(swa_deployment_token)
         
 - stage: qa_deploy
