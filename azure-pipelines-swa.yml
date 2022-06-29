@@ -1,0 +1,38 @@
+trigger:
+- master
+
+pool:
+  vmImage: ubuntu-latest
+stages:
+- stage: SwaDEV
+  displayName: SWA DEV
+
+  jobs:
+  - job: Prueba
+    displayName: Prueba
+   # environment: 'DEV'
+    variables:
+      - name: environment
+        value: DEV
+      - group: ${{ format('variables-{0}', variables.environment) }}  
+    steps:
+    - task: AzureStaticWebApp@0
+      inputs:
+        app_location: '/'
+        api_location: 'api'
+      #  routes_location: '/public'
+      env: 
+        azure_static_web_apps_api_token: $(deployment_token)
+        
+- stage: qa_deploy
+  jobs:
+  - deployment: qa_deploy  #not a job... a deployment!
+    pool:
+      vmImage: 'ubuntu-latest'
+    environment: 'qa-hello'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - script: echo "hello, qa world !!!"
+            displayName: 'Msg Deploy QA'
