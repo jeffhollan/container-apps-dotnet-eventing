@@ -59,7 +59,7 @@ stages:
     environment: 'DEV'
     variables:
       - name: environment
-        value: dev
+        value: DEV
       - group: ${{ format('variables-{0}', variables.environment) }}  
     strategy:
       runOnce:
