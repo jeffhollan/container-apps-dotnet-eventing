@@ -85,8 +85,8 @@ stages:
                   az group create --name $(RESOURCE_GROUP) --location 'canadacentral'
                   # $(location)
                   az deployment group create --resource-group $(RESOURCE_GROUP) --template-file deploy/main.bicep  -p \
-                  serviceBusImage='$(imageRepositorybus)' \
-                  eventHubImage='$(imageRepositoryhub)' \
+                  serviceBusImage='$(containerRegistry)/$(imageRepositorybus)' \
+                  eventHubImage='$(containerRegistry)/$(imageRepositoryhub)' \
                   registry=$(containerRegistry) \
                   registryUsername=$(registryUsername) \
                   registryPassword=$(registryPassword) \
