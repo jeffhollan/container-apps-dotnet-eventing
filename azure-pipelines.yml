@@ -52,17 +52,26 @@ stages:
 - stage: Deploy
   displayName: Despliega la infra        
   jobs:
-  - job: Deploy
+  - deployment: dev
     displayName: Deploy
+    environment: DEV
     pool:
       vmImage: $(vmImageName)
-    steps:
-    - task: AzureCLI@2
-      inputs:
-        azureSubscription: $(azureServiceConnection)
-        scriptType: bash
-        scriptLocation: inlineScript
-        inlineScript: |
-          az --version
-          az group create --name $(resourceGroupName) --location $(location)
-          az deployment group create --resource-group $(resourceGroupName) --template-file $(templateFile)    
+      variables:
+      - name: environment
+        value: dev
+      - group: ${{ format('variables-{0}', variables.environment) }}  
+      strategy:
+        runOnce:
+          deploy:
+            steps:      
+            - task: AzureCLI@2
+              inputs:
+                azureSubscription: $(Subscription)
+                scriptType: bash
+                scriptLocation: inlineScript
+                inlineScript: |
+                  az --version
+                  az group create --name $(RESOURCE_GROUP) --location 'canadacentral'
+                  # $(location)
+                  # az deployment group create --resource-group $(resourceGroupName) --template-file $(templateFile)    
