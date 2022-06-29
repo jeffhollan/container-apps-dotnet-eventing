@@ -52,23 +52,23 @@ stages:
 - stage: Deploy
   displayName: Despliega la infra        
   jobs:
-  - deployment: dev
-    displayName: Deploy
-    environment: DEV
+  - deployment: dev_deploy
     pool:
-      vmImage: $(vmImageName)
-      variables:
+      vmImage: $(vmImageName) 
+    displayName: Deploy en Dev
+    environment: 'DEV'
+    variables:
       - name: environment
         value: dev
       - group: ${{ format('variables-{0}', variables.environment) }}  
-      strategy:
-        runOnce:
-          deploy:
-            steps:   
-            - script: echo "Tratando de Crear ACA"
-              displayName: 'Msg Deploy'   
-            - task: AzureCLI@2
-              inputs:
+    strategy:
+      runOnce:
+        deploy:
+          steps:   
+          - script: echo "Tratando de Crear ACA"
+            displayName: 'Msg Deploy'   
+          - task: AzureCLI@2
+            inputs:
                 azureSubscription: $(Subscription)
                 scriptType: bash
                 scriptLocation: inlineScript
