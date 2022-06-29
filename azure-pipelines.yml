@@ -64,7 +64,9 @@ stages:
       strategy:
         runOnce:
           deploy:
-            steps:      
+            steps:   
+            - script: echo "Tratando de Crear ACA"
+              displayName: 'Msg Deploy'   
             - task: AzureCLI@2
               inputs:
                 azureSubscription: $(Subscription)
