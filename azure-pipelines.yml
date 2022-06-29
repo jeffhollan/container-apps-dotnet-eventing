@@ -69,7 +69,7 @@ stages:
       runOnce:
         deploy:
           steps:   
-          - checkout: all
+          - checkout: self
           - script: echo "Tratando de Crear ACA"
             displayName: 'Msg Deploy'   
           - script: ls $(System.DefaultWorkingDirectory)
