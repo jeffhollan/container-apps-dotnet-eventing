@@ -78,5 +78,5 @@ stages:
                   az --version
                   az group create --name $(RESOURCE_GROUP) --location 'canadacentral'
                   # $(location)
-                  az deployment group create --resource-group $(RESOURCE_GROUP) --template-file ./deploy/main.bicep
+                  az deployment group create --resource-group $(RESOURCE_GROUP) --template-file deploy/main.bicep
                   # $(templateFile)    
