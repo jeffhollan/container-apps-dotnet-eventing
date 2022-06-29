@@ -48,6 +48,8 @@ stages:
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
+    - script: ls -lh
+      displayName: 'Listandoo en Build'             
 
 - stage: Deploy
   displayName: Despliega la infra        
