@@ -88,8 +88,8 @@ stages:
                   serviceBusImage='$(imageRepositorybus)' \
                   eventHubImage='$(imageRepositoryhub)' \
                   registry=$(containerRegistry) \
-                  registryUsername=fisica3 \
-                  registryPassword=prueba \
+                  registryUsername=$(registryUsername) \
+                  registryPassword=$(registryPassword) \
                   deployDebugSite='$(DEBUG_SITE)' 
                 #repositoryUrl='${{ github.server_url }}/${{ github.repository }}.git' \
                 #repositoryToken='${{ secrets.SWA_TOKEN }}'
