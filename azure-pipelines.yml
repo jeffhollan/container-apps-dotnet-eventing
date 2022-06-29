@@ -52,7 +52,9 @@ stages:
       displayName: 'Listandoo en Build'             
 
 - stage: Deploy
-  displayName: Despliega la infra        
+  displayName: Despliega la infra   
+  dependsOn: Build
+  condition: succeeded()     
   jobs:
   - deployment: dev_deploy
     pool:
