@@ -83,7 +83,6 @@ stages:
                 inlineScript: |
                   az --version
                   az group create --name $(RESOURCE_GROUP) --location 'canadacentral'
-                  # $(location)
                   az deployment group create --resource-group $(RESOURCE_GROUP) --template-file deploy/main.bicep  -p \
                   serviceBusImage='$(containerRegistry)/$(imageRepositorybus):$(tag)' \
                   eventHubImage='$(containerRegistry)/$(imageRepositoryhub):$(tag)' \
