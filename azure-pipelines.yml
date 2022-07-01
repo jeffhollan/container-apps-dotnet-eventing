@@ -1,0 +1,95 @@
+# Docker
+# Build and push an image to Azure Container Registry
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+- main
+
+resources:
+- repo: self
+
+variables:
+  # Container registry service connection established during pipeline creation
+  dockerRegistryServiceConnection: '4195a6a6-7ca9-49be-a527-2973a9310d00'
+  imageRepositorybus: 'container-apps-dotnet-eventing/servicebus'
+  imageRepositoryhub: 'container-apps-dotnet-eventing/eventhub'
+  containerRegistry: 'repasowebappacr.azurecr.io'
+  dockerfilePathHub: '$(Build.SourcesDirectory)/event-hub/Dockerfile'
+  dockerfilePathBus: '$(Build.SourcesDirectory)/service-bus/Dockerfile'
+  DEBUG_SITE: true
+  tag: '$(Build.BuildId)'
+
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
+pool:
+  vmImage: $(vmImageName)
+
+stages:
+- stage: Build
+  displayName: Build and push stage
+  jobs:
+  - job: Build
+    displayName: Build
+    steps:
+    - task: Docker@2
+      displayName: (Hub) Build and push an image to container registry
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepositoryhub)
+        dockerfile: $(dockerfilePathBus)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+    - task: Docker@2
+      displayName: (Bus) Build and push an image to container registry
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepositorybus)
+        dockerfile: $(dockerfilePathBus)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+    - script: ls -lh
+      displayName: 'Listandoo en Build'             
+
+- stage: Deploy
+  displayName: Despliega la infra   
+  dependsOn: Build
+  condition: succeeded()     
+  jobs:
+  - deployment: dev_deploy
+    #pool:
+    #  vmImage: $(vmImageName) 
+    displayName: Deploy en Dev
+    environment: 'DEV'
+    variables:
+      - name: environment
+        value: DEV
+      - group: ${{ format('variables-{0}', variables.environment) }}  
+    strategy:
+      runOnce:
+        deploy:
+          steps:   
+          - checkout: self
+          - script: echo "Tratando de Crear ACA"
+            displayName: 'Msg Deploy'   
+          - script: ls $(System.DefaultWorkingDirectory)
+            displayName: 'Listandoo...'               
+          - task: AzureCLI@2
+            inputs:
+                azureSubscription: scazuresponsorship
+                scriptType: bash
+                scriptLocation: inlineScript
+                inlineScript: |
+                  az --version
+                  az group create --name $(RESOURCE_GROUP) --location 'canadacentral'
+                  az deployment group create --resource-group $(RESOURCE_GROUP) --template-file deploy/main.bicep  -p \
+                  serviceBusImage='$(containerRegistry)/$(imageRepositorybus):$(tag)' \
+                  eventHubImage='$(containerRegistry)/$(imageRepositoryhub):$(tag)' \
+                  registry=$(containerRegistry) \
+                  registryUsername=$(registryUsername) \
+                  registryPassword=$(registryPassword) \
+                  deployDebugSite='$(DEBUG_SITE)' 
+                #repositoryUrl='${{ github.server_url }}/${{ github.repository }}.git' \
+                #repositoryToken='${{ secrets.SWA_TOKEN }}'
+                  # $(templateFile)    
