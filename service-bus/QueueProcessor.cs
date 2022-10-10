@@ -42,7 +42,7 @@ public class QueueProcessor : BackgroundService
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            var message = $"{_podName}: QueueProcessor running at: {DateTimeOffset.Now}";
+            var message = $"{_podName}: QueueProcessor running at: {DateTimeOffset.UtcNow}";
             _logger.LogInformation(message);
             if(_isPubSub)
             {
